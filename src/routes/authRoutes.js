@@ -27,7 +27,7 @@ router.get("/logout", (req, res) => {
 router.get("/profile", authMiddleware, (req, res) => {
     res.json({
       message: "Profile accessed successfully!",
-      user: req.user, // This is the decoded JWT user info
+      user: req.user, 
     });
   });
 

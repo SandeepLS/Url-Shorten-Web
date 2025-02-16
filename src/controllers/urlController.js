@@ -9,7 +9,7 @@ const BASE_URL = process.env.BASE_URL;
 // Shorten a URL
 exports.createShorten = async (req, res) => {
     const { originalUrl, topic } = req.body;
-    const createdBy = req.user.googleId; // Authenticated user ID
+    const createdBy = req.user.googleId;
 
     if (!validateUrl(originalUrl)) {
         return res.status(400).json({ error: "Invalid URL" });
@@ -41,13 +41,13 @@ exports.redirectUrl = async (req, res) => {
         return res.status(404).send({ error: 'URL not found' });
       }
 
-      // Parse User-Agent
+      // parse User-Agent
       const parser = new UAParser(req.headers["user-agent"]);
       const uaResult = parser.getResult();
       const os = uaResult.os.name || "Unknown";
       const device = uaResult.device.type || "Desktop";
 
-      // Log analytics
+      // log analytics
       await Analytics.create({
           shortUrl: url.shortUrl,
           ip: req.ip, // IP tracking
@@ -69,7 +69,7 @@ exports.redirectUrl = async (req, res) => {
 
 };
 
-// Helper function to get date range (last 7 days)
+// get date range (last 7 days)
 const getDateRange = () => {
     const dates = [];
     for (let i = 6; i >= 0; i--) {
@@ -86,27 +86,21 @@ exports.getUrlAnalytics = async (req, res) => {
         const alias = req.params.alias;
         const shortUrl = `${process.env.BASE_URL}/${alias}`;
 
-        // Check if the URL exists
         const url = await Url.findOne({ shortUrl });
         if (!url) return res.status(404).json({ error: "Short URL not found" });
 
-        // Fetch analytics data
         const analyticsData = await Analytics.find({ shortUrl });
 
-        // Total clicks
         const totalClicks = analyticsData.length;
 
-        // Unique users by IP
         const uniqueUsers = new Set(analyticsData.map((entry) => entry.ip)).size;
 
-        // Clicks by Date
         const dateRange = getDateRange();
         const clicksByDate = dateRange.map(date => ({
             date,
             clickCount: analyticsData.filter(entry => entry.timestamp.toISOString().split("T")[0] === date).length
         }));
 
-        // OS Distribution
         const osData = {};
         analyticsData.forEach(entry => {
             osData[entry.os] = osData[entry.os] ? osData[entry.os] + 1 : 1;
@@ -116,7 +110,6 @@ exports.getUrlAnalytics = async (req, res) => {
             uniqueClicks
         }));
 
-        // Device Type Distribution
         const deviceData = {};
         analyticsData.forEach(entry => {
             deviceData[entry.device] = deviceData[entry.device] ? deviceData[entry.device] + 1 : 1;

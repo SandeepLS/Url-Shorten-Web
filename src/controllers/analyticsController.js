@@ -1,12 +1,11 @@
 const Analytics = require("../models/Analytics");
 const Url = require("../models/Url");
 
-// Get Topic
+// get Topic
 exports.getTopicAnalytics = async (req, res) => {
     try {
         const topic = req.params.topic;
 
-        // Find all URLs under the specified topic
         const urls = await Url.find({ topic });
 
         if (urls.length === 0) {
@@ -16,14 +15,12 @@ exports.getTopicAnalytics = async (req, res) => {
         const shortUrls = urls.map(url => url.shortUrl);
         const analyticsData = await Analytics.find({ shortUrl: { $in: shortUrls } });
 
-        // Calculate total clicks & unique users
         const totalClicks = analyticsData.length;
         const uniqueUsers = new Set(analyticsData.map(entry => entry.ip)).size;
 
-        // Group clicks by date safely
         const clicksByDate = {};
         analyticsData.forEach(entry => {
-            if (entry.createdAt) { // Check if createdAt exists
+            if (entry.createdAt) { 
                 const date = new Date(entry.createdAt).toISOString().split("T")[0]; // Format YYYY-MM-DD
                 clicksByDate[date] = (clicksByDate[date] || 0) + 1;
             }
@@ -34,7 +31,6 @@ exports.getTopicAnalytics = async (req, res) => {
             totalClicks: count
         }));
 
-        // Process URL-wise analytics
         const urlAnalytics = urls.map(url => {
             const urlClicks = analyticsData.filter(entry => entry.shortUrl === url.shortUrl);
             const uniqueUrlUsers = new Set(urlClicks.map(entry => entry.ip)).size;
@@ -60,12 +56,11 @@ exports.getTopicAnalytics = async (req, res) => {
     }
 };
 
-// Get overall
+// Get overall(Fetch all URLs created by the user)
 exports.getOverallAnalytics = async (req, res) => {
     try {
         const userId = req.user.googleId;
 
-        // Fetch all URLs created by the user
         const urls = await Url.find({ createdBy: userId });
         if (!urls.length) {
             return res.json({
@@ -80,7 +75,6 @@ exports.getOverallAnalytics = async (req, res) => {
 
         const shortUrls = urls.map(url => url.shortUrl);
         const analyticsData = await Analytics.find({ shortUrl: { $in: shortUrls } });
-        // console.log("Fetched Analytics Data:", analyticsData);
 
         let totalClicks = 0;
         const uniqueUsersSet = new Set();
@@ -92,11 +86,9 @@ exports.getOverallAnalytics = async (req, res) => {
             totalClicks++;
             uniqueUsersSet.add(entry.ip);
 
-            // Clicks by date
             const date = entry.timestamp.toISOString().split('T')[0];
             clicksByDateMap.set(date, (clicksByDateMap.get(date) || 0) + 1);
 
-            // OS Type
             if (entry.os) {
                 const osData = osTypeMap.get(entry.os) || { uniqueClicks: 0, uniqueUsers: new Set() };
                 osData.uniqueClicks++;
@@ -104,7 +96,6 @@ exports.getOverallAnalytics = async (req, res) => {
                 osTypeMap.set(entry.os, osData);
             }
 
-            // Device Type
             if (entry.device) {
                 const deviceData = deviceTypeMap.get(entry.device) || { uniqueClicks: 0, uniqueUsers: new Set() };
                 deviceData.uniqueClicks++;
@@ -113,7 +104,6 @@ exports.getOverallAnalytics = async (req, res) => {
             }
         });
 
-        // Convert maps to arrays
         const clicksByDate = Array.from(clicksByDateMap, ([date, totalClicks]) => ({ date, totalClicks }));
         const osType = Array.from(osTypeMap, ([osName, data]) => ({ osName, uniqueClicks: data.uniqueClicks, uniqueUsers: data.uniqueUsers.size }));
         const deviceType = Array.from(deviceTypeMap, ([deviceName, data]) => ({ deviceName, uniqueClicks: data.uniqueClicks, uniqueUsers: data.uniqueUsers.size }));

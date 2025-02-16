@@ -11,17 +11,6 @@ passport.use(
             callbackURL: "/auth/google/callback",
         },
         async (accessToken, refreshToken, profile, done) => {
-            // const user {
-            //     googleId: profile.id,
-            //     displayName: profile.displayName,
-            //     email: profile.emails[0].value,
-            //     avatar: profile.photos[0].value,
-            // };
-
-            // // Generate JWT
-            // const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: "7d" });
-            // return done(null, { user, token });
-
             try {
                 let user = await User.findOne({ googleId: profile.id });
         
@@ -34,7 +23,6 @@ passport.use(
                     });
                 }
         
-                // Convert Mongoose document to a plain object
                 const userObj = {
                     id: user.id,
                     googleId: user.googleId,
@@ -43,7 +31,6 @@ passport.use(
                     avatar: user.avatar
                 };
         
-                // Generate JWT
                 const token = jwt.sign(userObj, process.env.JWT_SECRET, { expiresIn: "7d" });
         
                 return done(null, { user: userObj, token });
