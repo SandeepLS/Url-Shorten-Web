@@ -1,3 +1,170 @@
+What Will Happen in Our Project?
+Users log in with Google
+They send a request with a long URL
+Our backend creates a short URL and returns it
+When anyone visits the short URL, they are redirected to the original link
+We store and track clicks on the short links
+-----------------------------********************-----------------------------------
+
+1. GET request: http://localhost:5000/
+    {
+    "message": "URL Shortener API is running!"
+    }
+
+2. First, login using: GET http://localhost:5000/auth/google
+   (This will authenticate you in the browser.)
+
+3. Get profile
+   http://localhost:5000/auth/profile
+   Authorization: Bearer YOUR_JWT_TOKEN
+   Response:
+   {
+    "user": {
+        "id": "67b1f4c4df4f6b60867b0621",
+        "googleId": "105319629632544805749",
+        "displayName": "Sandeep L S",
+        "email": "sandeepls3025@gmail.com",
+        "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJMAv-X8ly3Yq-yFOyBPsZM49GciwFRHzz28eb-c4cnUjmFKw=s96-c"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YjFmNGM0ZGY0ZjZiNjA4NjdiMDYyMSIsImdvb2dsZUlkIjoiMTA1MzE5NjI5NjMyNTQ0ODA1NzQ5IiwiZGlzcGxheU5hbWUiOiJTYW5kZWVwIEwgUyIsImVtYWlsIjoic2FuZGVlcGxzMzAyNUBnbWFpbC5jb20iLCJhdmF0YXIiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NKTUF2LVg4bHkzWXEteUZPeUJQc1pNNDlHY2l3RlJIenoyOGViLWM0Y25Vam1GS3c9czk2LWMiLCJpYXQiOjE3Mzk3MTU3ODAsImV4cCI6MTc0MDMyMDU4MH0.zBpPG87bPkO-skiQI3FmnPpOdxhqFyjtwujqnE7AECs"
+    }
+
+4. Get logout
+   http://localhost:5000/auth/logout
+   Authorization: Bearer YOUR_JWT_TOKEN
+   response:
+   {
+        "message": "Logged out successfully"
+   }
+
+5. Macking short url:-
+    Method: POST
+    URL: http://localhost:5000/api/shorten
+    Headers:
+    Authorization: Bearer YOUR_JWT_TOKEN
+    Content-Type: application/json
+    Body: { "originalUrl": "https://example.com" }
+
+    Response is: 
+    {
+        "originalUrl": "https://protocoderspoint.com/most-utilized-api-protocal-architecture/",
+        "shortUrl": "http://localhost:5000/api/urls/fWCMzcrkG",
+        "clicks": 0,
+        "createdBy": "105319629632544805749",
+        "topic": "Music",
+        "_id": "67b1ac3ee2385ea192d3db83",
+        "createdAt": "2025-02-16T09:13:34.213Z",
+        "__v": 0
+    }
+
+6. Redirect Short URL:- if i click the url, Yes it's redirecting.
+    Open http://localhost:5000/abc123 in a browser.
+    It should redirect to https://example.com.
+
+7. Fetch analytics for a specific short URL:-
+    Get: http://localhost:5000/api/urls/analytics/{shortCode}
+    Headers:
+    Authorization: Bearer YOUR_JWT_TOKEN
+    Response: {
+        "totalClicks": 3,
+        "uniqueUsers": 1,
+        "clicksByDate": [
+            {
+                "date": "2025-02-10",
+                "clickCount": 0
+            },
+            {
+                "date": "2025-02-11",
+                "clickCount": 0
+            },
+            {
+                "date": "2025-02-12",
+                "clickCount": 0
+            },
+            {
+                "date": "2025-02-13",
+                "clickCount": 0
+            },
+            {
+                "date": "2025-02-14",
+                "clickCount": 0
+            },
+            {
+                "date": "2025-02-15",
+                "clickCount": 0
+            },
+            {
+                "date": "2025-02-16",
+                "clickCount": 3
+            }
+        ],
+        "osType": [
+            {
+                "osName": "Windows",
+                "uniqueClicks": 3
+            }
+        ],
+        "deviceType": [
+            {
+                "deviceName": "Desktop",
+                "uniqueClicks": 3
+            }
+        ]
+    }
+
+8. Implementing GET /api/analytics/topic/:topic API
+    Get: http://localhost:5000/api/analytics/topic/:topic
+    Authorization Bearer 
+    response:
+    {
+        "topic": "Music",
+        "totalClicks": 3,
+        "uniqueUsers": 1,
+        "clicksByDate": [
+            {
+                "date": "2025-02-16",
+                "totalClicks": 3
+            }
+        ],
+        "urls": [
+            {
+                "shortUrl": "http://localhost:5000/api/urls/fWCMzcrkG",
+                "totalClicks": 3,
+                "uniqueUsers": 1
+            }
+        ]
+    }
+
+9. Implement the Overall Analytics API endpoint
+    GET http://localhost:5000/api/analytics/overall
+    Authorization: Bearer <your_token>
+    response: {
+        "totalUrls": 1,
+        "totalClicks": 3,
+        "uniqueUsers": 1,
+        "clicksByDate": [
+            {
+                "date": "2025-02-16",
+                "totalClicks": 3
+            }
+        ],
+        "osType": [
+            {
+                "osName": "Windows",
+                "uniqueClicks": 3,
+                "uniqueUsers": 1
+            }
+        ],
+        "deviceType": [
+            {
+                "deviceName": "Desktop",
+                "uniqueClicks": 3,
+                "uniqueUsers": 1
+            }
+        ]
+    }
+
+-------------------------------------------------------
 npm init -y
 npm install express mongoose redis dotenv jsonwebtoken passport-google-oauth20 cors rate-limit
 npm install --save-dev nodemon
